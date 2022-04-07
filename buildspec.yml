@@ -4,20 +4,8 @@ env:
   variables:
     REPOSITORY_TAG: $REPOSITORY_TAG
     REPOSITORY_URI: $REPOSITORY_URI
-    NODE_PATH: $NODE_PATH
-    REACT_APP_DEFAULTAUTH: jwt
-    REACT_APP_WEBSITE_NAME: $REACT_APP_WEBSITE_NAME
-    REACT_APP_NAME: $REACT_APP_NAME
-    REACT_APP_WEBSITE_DESCRIPTION: $REACT_APP_WEBSITE_DESCRIPTION
-    REACT_APP_API_BASE_URL: $REACT_APP_API_BASE_URL
-    REACT_APP_DEVICE_ENV: $REACT_APP_DEVICE_ENV
-    REACT_APP_REPORT_BASE_URL: $REACT_APP_REPORT_BASE_URL
-    REACT_APP_REPORT_X_API_KEY: $REACT_APP_REPORT_X_API_KEY
-    REACT_APP_GOOGLE_ANALYTICS_ID: $REACT_APP_GOOGLE_ANALYTICS_ID
-    REACT_APP_PROJECT_ENVIRONMENT: $REACT_APP_PROJECT_ENVIRONMENT
-    REACT_APP_API_VERSION: $REACT_APP_API_VERSION
-    FAST_REFRESH: $FAST_REFRESH
-    NODE_ENV: $NODE_ENV
+    AWS_DEFAULT_REGION: $AWS_DEFAULT_REGION
+    ACCOUNT_ID: $ACCOUNT_ID
   parameter-store:
     DOCKER_USER: dockeruser
     DOCKER_PASS: dockerpass
@@ -48,6 +36,6 @@ phases:
       - docker push $REPOSITORY_URI:$REPOSITORY_TAG
       - docker push $REPOSITORY_URI:$IMAGE_TAG
       - echo Writing image definitions file...
-      - printf '[{"name":"nowmid4-data-analytics-cms","imageUri":"%s"}]' $REPOSITORY_URI:$IMAGE_TAG > imagedefinitions.json
+      - printf '[{"name":"aws-codebuild-helloworld","imageUri":"%s"}]' $REPOSITORY_URI:$IMAGE_TAG > imagedefinitions.json
 artifacts:
     files: imagedefinitions.json
