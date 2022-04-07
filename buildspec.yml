@@ -1,0 +1,53 @@
+version: 0.2
+
+env:
+  variables:
+    REPOSITORY_TAG: $REPOSITORY_TAG
+    REPOSITORY_URI: $REPOSITORY_URI
+    NODE_PATH: $NODE_PATH
+    REACT_APP_DEFAULTAUTH: jwt
+    REACT_APP_WEBSITE_NAME: $REACT_APP_WEBSITE_NAME
+    REACT_APP_NAME: $REACT_APP_NAME
+    REACT_APP_WEBSITE_DESCRIPTION: $REACT_APP_WEBSITE_DESCRIPTION
+    REACT_APP_API_BASE_URL: $REACT_APP_API_BASE_URL
+    REACT_APP_DEVICE_ENV: $REACT_APP_DEVICE_ENV
+    REACT_APP_REPORT_BASE_URL: $REACT_APP_REPORT_BASE_URL
+    REACT_APP_REPORT_X_API_KEY: $REACT_APP_REPORT_X_API_KEY
+    REACT_APP_GOOGLE_ANALYTICS_ID: $REACT_APP_GOOGLE_ANALYTICS_ID
+    REACT_APP_PROJECT_ENVIRONMENT: $REACT_APP_PROJECT_ENVIRONMENT
+    REACT_APP_API_VERSION: $REACT_APP_API_VERSION
+    FAST_REFRESH: $FAST_REFRESH
+    NODE_ENV: $NODE_ENV
+  parameter-store:
+    DOCKER_USER: dockeruser
+    DOCKER_PASS: dockerpass
+phases:
+  install:
+    runtime-versions:
+      nodejs: 14
+  pre_build:
+    commands:
+      - aws --version
+      - echo Logging in to Amazon ECR...
+      - aws ecr get-login-password --region $AWS_DEFAULT_REGION | docker login --username AWS --password-stdin $ACCOUNT_ID.dkr.ecr.$AWS_DEFAULT_REGION.amazonaws.com
+      - COMMIT_HASH=$(echo $CODEBUILD_RESOLVED_SOURCE_VERSION | cut -c 1-7)
+      - IMAGE_TAG=${COMMIT_HASH:=$REPOSITORY_TAG}
+      - docker login --username $DOCKER_USER --password $DOCKER_PASS
+      - yarn install --production --ignore-optional --frozen-lockfile
+  build:
+    commands:
+      - echo Build started on `date`
+      - yarn run build
+      - echo Building the Docker image...
+      - docker build -t $REPOSITORY_URI:$REPOSITORY_TAG .
+      - docker tag $REPOSITORY_URI:$REPOSITORY_TAG $REPOSITORY_URI:$IMAGE_TAG
+  post_build:
+    commands:
+      - echo Build completed on `date`
+      - echo Pushing the Docker images...
+      - docker push $REPOSITORY_URI:$REPOSITORY_TAG
+      - docker push $REPOSITORY_URI:$IMAGE_TAG
+      - echo Writing image definitions file...
+      - printf '[{"name":"nowmid4-data-analytics-cms","imageUri":"%s"}]' $REPOSITORY_URI:$IMAGE_TAG > imagedefinitions.json
+artifacts:
+    files: imagedefinitions.json
