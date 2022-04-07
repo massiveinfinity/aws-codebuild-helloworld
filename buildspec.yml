@@ -21,11 +21,9 @@ phases:
       - COMMIT_HASH=$(echo $CODEBUILD_RESOLVED_SOURCE_VERSION | cut -c 1-7)
       - IMAGE_TAG=${COMMIT_HASH:=$REPOSITORY_TAG}
       - docker login --username $DOCKER_USER --password $DOCKER_PASS
-      - yarn install --production --ignore-optional --frozen-lockfile
   build:
     commands:
       - echo Build started on `date`
-      - yarn run build
       - echo Building the Docker image...
       - docker build -t $REPOSITORY_URI:$REPOSITORY_TAG .
       - docker tag $REPOSITORY_URI:$REPOSITORY_TAG $REPOSITORY_URI:$IMAGE_TAG
