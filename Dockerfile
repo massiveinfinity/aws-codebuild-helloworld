@@ -1,2 +1,2 @@
 FROM crccheck/hello-world
-EXPOSE 80
+EXPOSE 8000
